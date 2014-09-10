@@ -7,7 +7,6 @@ namespace RobotArms {
 		void UnregisterComponent(RobotArmsComponent component);
 		void RunAtEndOfFrame(Action action);
 		void RunAtEndOfCurrentUpdateType(Action action);
-		void DestroyComponent(RobotArmsComponent component);
-		void DestroyGameObject(GameObject gameObject);
+		T[] GetAllComponentsOfType<T>() where T : RobotArmsComponent;
 	}
 }

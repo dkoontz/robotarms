@@ -1,19 +1,21 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using GoodStuff.NaturalLanguage;
 using System.Linq;
 using UnityEngine;
-using System.Collections;
 
 namespace RobotArms {
 	public class RobotArmsCoordinator : MonoBehaviour, IRobotArmsCoordinator {
 		public MonoBehaviour Blackboard;
+		[HideInInspector] public List<string> EnabledProcessorTags = new List<string> { "Untagged" };
 
 		RobotArmsProcessor[] processors;
 		RobotArmsProcessor[] updateProcessors;
 		RobotArmsProcessor[] fixedUpdateProcessors;
 		RobotArmsProcessor[] lateUpdateProcessors;
 		Dictionary<RobotArmsProcessor, HashSet<GameObject>> entitiesForProcessors;
+		HashSet<RobotArmsComponent> components = new HashSet<RobotArmsComponent>();
 		Queue<GameObject> entitiesWithComponentsThatWereRemoved = new Queue<GameObject>();
 		Queue<Action> actionsToRunAtEndOfCurrentUpdateType = new Queue<Action>();
 		Queue<Action> actionsToRunAtEndOfFrame = new Queue<Action>();
@@ -27,31 +29,38 @@ namespace RobotArms {
 				assembly => assembly.GetTypes().Where(
 					type => type.IsSubclassOf(typeof(RobotArmsProcessor))));
 
-			processors = processorTypes.Select(type => Activator.CreateInstance(type) as RobotArmsProcessor).OrderBy(p => -p.Options.Priority).ToArray();
+			processors = processorTypes
+				.Where(type => EnabledProcessorTags.Contains((type.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true)[0] as ProcessorOptionsAttribute).Tag))
+				.Select(type => Activator.CreateInstance(type) as RobotArmsProcessor)
+				.OrderBy(p => -p.Options.Priority)
+				.ToArray();
+
 			processors.Each(p => {
 				p.Coordinator = this;
 				p.Blackboard = Blackboard;
 			});
-
-
+				
 			entitiesForProcessors = new Dictionary<RobotArmsProcessor, HashSet<GameObject>>(processors.Length);
 			processors.Each(p => entitiesForProcessors[p] = new HashSet<GameObject>());
 			updateProcessors = processors.Where(p => p.Options.Phase == UpdateType.Update).ToArray();
 			fixedUpdateProcessors = processors.Where(p => p.Options.Phase == UpdateType.FixedUpdate).ToArray();
 			lateUpdateProcessors = processors.Where(p => p.Options.Phase == UpdateType.LateUpdate).ToArray();
 
-			Debug.Log("update: {0}, fixed: {1}, late: {2}".Fmt(updateProcessors.Length, fixedUpdateProcessors.Length, lateUpdateProcessors.Length));
-
 			RobotArmsComponent.RobotArmsCoordinator = this;
 
 			StartCoroutine(EndOfFrameActionProcessor());
 		}
 
+		// TODO: Add ability to add and remove tags that are active
+		// this should cause the set of processors to change
+
 		public void RegisterComponent(RobotArmsComponent component) {
+			components.Add(component);
 			processors.Where(p => p.IsInterestedIn(component.gameObject)).Each(p => entitiesForProcessors[p].Add(component.gameObject));
 		}
 
 		public void UnregisterComponent(RobotArmsComponent component) {
+			components.Remove(component);
 			entitiesWithComponentsThatWereRemoved.Enqueue(component.gameObject);
 		}
 
@@ -63,12 +72,8 @@ namespace RobotArms {
 			actionsToRunAtEndOfCurrentUpdateType.Enqueue(action);
 		}
 
-		public void DestroyComponent(RobotArmsComponent component) {
-			RunAtEndOfCurrentUpdateType(() => Destroy(component));
-		}
-
-		public void DestroyGameObject(GameObject gameObject) {
-			RunAtEndOfCurrentUpdateType(() => Destroy(gameObject));
+		public T[] GetAllComponentsOfType<T>() where T : RobotArmsComponent {
+			return components.OfType<T>().ToArray();
 		}
 
 		public void Update() {

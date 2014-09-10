@@ -1,11 +1,9 @@
 ﻿using System;
 using UnityEngine;
-//using Artemis.Interface;
 using RobotArms;
 
 namespace RobotArms {
-	public class RobotArmsComponent : MonoBehaviour { //, IComponent {
-//		public static EntitySystemManager EntitySystemManager;
+	public class RobotArmsComponent : MonoBehaviour {
 		public static IRobotArmsCoordinator RobotArmsCoordinator;
 
 		// Set this to false during Initialize or Awake to prevent the component
@@ -19,13 +17,9 @@ namespace RobotArms {
 			if (autoRegister) {
 				RobotArmsCoordinator.RegisterComponent(this);
 			}
-//			EntitySystemManager.AddComponent(gameObject, this);
-//			EntitySystemManager.OnBeforeEntityProcessed += OnBeforeEntityProcessed;
-//			EntitySystemManager.OnAfterEntityProcessed += OnAfterEntityProcessed;
 		}
 
 		public void OnDestroy() {
-			Debug.Log("Destroying Component");
 			RobotArmsCoordinator.UnregisterComponent(this);
 		}
 
@@ -33,7 +27,5 @@ namespace RobotArms {
 		/// Called before component is registered with any processors.
 		/// </summary>
 		protected virtual void Initialize() { }
-//		protected virtual void OnBeforeEntityProcessed() { }
-//		protected virtual void OnAfterEntityProcessed() { }
 	}
 }

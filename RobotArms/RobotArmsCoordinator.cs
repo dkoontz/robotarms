@@ -108,34 +108,26 @@ namespace RobotArms {
 			return components.OfType<T>().ToArray();
 		}
 
-		private void Update(IEnumerable<RobotArmsProcessor> robotArmsProcessors) {
+		public void Update() {
+			RunProcessors(updateProcessors);
+		}
+
+		public void FixedUpdate() {
+			RunProcessors(fixedUpdateProcessors);
+		}
+
+		public void LateUpdate() {
+			RunProcessors(lateUpdateProcessors);
+		}
+
+		void RunProcessors(IEnumerable<RobotArmsProcessor> robotArmsProcessors) {
+			RemovePendingComponents();
+
 			foreach (var p in robotArmsProcessors) {
 				if (p.IsActive == null || p.IsActive()) {
 					p.ProcessAll(entitiesForProcessors[p]);
 				}
 			}
-		}
-
-		public void Update() {
-			RemovePendingComponents();
-
-			Update(updateProcessors);
-
-			RunEndOfCurrentUpdateActions();
-		}
-
-		public void FixedUpdate() {
-			RemovePendingComponents();
-
-			Update(fixedUpdateProcessors);
-
-			RunEndOfCurrentUpdateActions();
-		}
-
-		public void LateUpdate() {
-			RemovePendingComponents();
-
-			Update(lateUpdateProcessors);
 
 			RunEndOfCurrentUpdateActions();
 		}

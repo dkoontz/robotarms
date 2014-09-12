@@ -153,6 +153,12 @@ Here we have an example of a processor that requires 3 different components. Onl
 
 So there we go. It's not a huge project but hopefully this has given you a taste of how RobotArms is different and perhaps how it can make your Unity development more productive.
 
+### Caveats ###
+
+1. This has not been tested on mobile.
+2. We are using Linq and foreach. If this aggravates your hyper-optimizing self and you want to rewrite everything to have absolutely zero memory allocation, patches are accepted.
+3. Yes, we expect you to use GetComponent EVERY FRAME. I'm sure you've all been told how GetComponent is the devil and will make your application slow to a crawl. Go profile it, you'll probably be surprised. At least on desktop it's pretty wickedly fast. I tried to add some optimizations to RobotArms to cache the component so that each frame you could retrieve it from a dictionary instead of calling GetComponent, turns out the Dictionary's direct lookup (not even TryGetValue) is SLOWER than GetComponent (at least on my system and in my tests), YMMV. RobotArms is optimized for programmer efficiency, with all the time you save you can profile your game and **then** go optimize the parts that are actually slow (which hopefully isn't RobotArms at that point ;^).
+
 ### License ###
 
 <pre>

@@ -24,7 +24,6 @@
 // 	 https://bitbucket.org/dkoontz/robotarms
 
 using UnityEngine;
-using RobotArms;
 
 namespace RobotArms {
 	public class RobotArmsComponent : MonoBehaviour {

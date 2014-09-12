@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace RobotArms {
 	public enum UpdateType {
@@ -100,11 +101,11 @@ namespace RobotArms {
 		}
 
 		public void DestroyComponent(RobotArmsComponent component) {
-			Coordinator.RunAtEndOfCurrentUpdateType(() => GameObject.Destroy(component));
+			Coordinator.RunAtEndOfCurrentUpdateType(() => Object.Destroy(component));
 		}
 
 		public void DestroyGameObject(GameObject gameObject) {
-			Coordinator.RunAtEndOfCurrentUpdateType(() => GameObject.Destroy(gameObject));
+			Coordinator.RunAtEndOfCurrentUpdateType(() => Object.Destroy(gameObject));
 		}
 
 		public T[] GetAllComponentsOfType<T>() where T : RobotArmsComponent {

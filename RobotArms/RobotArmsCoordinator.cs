@@ -39,10 +39,10 @@ namespace RobotArms {
 		RobotArmsProcessor[] fixedUpdateProcessors;
 		RobotArmsProcessor[] lateUpdateProcessors;
 		Dictionary<RobotArmsProcessor, HashSet<GameObject>> entitiesForProcessors;
-		HashSet<RobotArmsComponent> components = new HashSet<RobotArmsComponent>();
-		Queue<GameObject> entitiesWithComponentsThatWereRemoved = new Queue<GameObject>();
-		Queue<Action> actionsToRunAtEndOfCurrentUpdateType = new Queue<Action>();
-		Queue<Action> actionsToRunAtEndOfFrame = new Queue<Action>();
+	    readonly HashSet<RobotArmsComponent> components = new HashSet<RobotArmsComponent>();
+	    readonly Queue<GameObject> entitiesWithComponentsThatWereRemoved = new Queue<GameObject>();
+	    readonly Queue<Action> actionsToRunAtEndOfCurrentUpdateType = new Queue<Action>();
+	    readonly Queue<Action> actionsToRunAtEndOfFrame = new Queue<Action>();
 
 		public void Awake() {
 			if (Blackboard == null) {

@@ -7,3 +7,4 @@ docs/UnityAsteroidsExample/Assembly-CSharp-vs.csproj
 docs/UnityAsteroidsExample/Assembly-CSharp.csproj
 docs/UnityAsteroidsExample/Library
 docs/UnityAsteroidsExample/Temp
+*.userprefs

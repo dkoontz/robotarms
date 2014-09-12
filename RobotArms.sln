@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotArms", "RobotArms.csproj", "{64BCA999-9CF8-4E3E-91D1-20A676B86D9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotArmsEditor", "RobotArmsEditor\RobotArmsEditor.csproj", "{1F17888D-A9CA-47BE-BD3D-FB53ED2D2BA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotArms", "RobotArms\RobotArms.csproj", "{47C2FE1C-6C5C-4D3C-9CEE-D7CDCA7BF683}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,12 +11,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{64BCA999-9CF8-4E3E-91D1-20A676B86D9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64BCA999-9CF8-4E3E-91D1-20A676B86D9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64BCA999-9CF8-4E3E-91D1-20A676B86D9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64BCA999-9CF8-4E3E-91D1-20A676B86D9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F17888D-A9CA-47BE-BD3D-FB53ED2D2BA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F17888D-A9CA-47BE-BD3D-FB53ED2D2BA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F17888D-A9CA-47BE-BD3D-FB53ED2D2BA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F17888D-A9CA-47BE-BD3D-FB53ED2D2BA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47C2FE1C-6C5C-4D3C-9CEE-D7CDCA7BF683}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47C2FE1C-6C5C-4D3C-9CEE-D7CDCA7BF683}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47C2FE1C-6C5C-4D3C-9CEE-D7CDCA7BF683}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47C2FE1C-6C5C-4D3C-9CEE-D7CDCA7BF683}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = RobotArms.csproj
+		StartupItem = RobotArmsEditor\RobotArmsEditor.csproj
 	EndGlobalSection
 EndGlobal

@@ -1,8 +1,8 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="src/RobotArmsCoordinator.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="RobotArmsEditor/RobotArmsCoordinatorEditor.cs">
     <Files>
-      <File FileName="src/RobotArmsCoordinator.cs" Line="35" Column="35" />
+      <File FileName="RobotArmsEditor/RobotArmsCoordinatorEditor.cs" Line="23" Column="23" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

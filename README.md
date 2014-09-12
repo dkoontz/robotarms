@@ -1,6 +1,6 @@
 # README #
 
-RobotArms is a Entity / Component / Processor[\*](#Processor) library for [Unity3D](http://unity3d.com). RobotArms emphasizes usage of Unity components as pure data and moves the logic into one or more processors. This data oriented approach leverages Unity's editor to show the full state of your application with no hidden information inside objects. This approach is **not** object oriented but instead takes a more functional-style approach to data processing. If you find that you are often exposing data from a MonoBehaviour just so that *another* MonoBehaviour can read from it (or worse yet, write to it), RobotArms will be a breath of fresh air.
+RobotArms is a Entity / Component / Processor\* library for [Unity3D](http://unity3d.com). RobotArms emphasizes usage of Unity components as pure data and moves the logic into one or more processors. This data oriented approach leverages Unity's editor to show the full state of your application with no hidden information inside objects. This approach is **not** object oriented but instead takes a more functional-style approach to data processing. If you find that you are often exposing data from a MonoBehaviour just so that *another* MonoBehaviour can read from it (or worse yet, write to it), RobotArms will be a breath of fresh air.
 
 If you are unfamiliar with this type of system I'd suggest the following reading:
 
@@ -8,8 +8,7 @@ If you are unfamiliar with this type of system I'd suggest the following reading
 [Entity Systems are the future of MMOG development](http://t-machine.org/index.php/2007/09/03/entity-systems-are-the-future-of-mmog-development-part-1/)  
 [Original 2002 GDC talk by Scott Bilas](http://scottbilas.com/files/2002/gdc_san_jose/game_objects_slides_with_notes.pdf)
 
-<a name="Processor"></a>
-* Most literature on this topic uses the terms Entity, Component, and System. The usage of the term System has since fallen out of favor somewhat due to the overloaded nature of the term and frequent naming collisions that occur. RobotArms uses the term Processor, so when reading any articles on the topic just substitute "Processor" whenever you see "System".
+\* Most literature on this topic uses the terms Entity, Component, and System. The usage of the term System has since fallen out of favor somewhat due to the overloaded nature of the term and frequent naming collisions that occur. RobotArms uses the term Processor, so when reading any articles on the topic just substitute "Processor" whenever you see "System".
 
 We were originally inspired to write RobotArms after using the [Artemis](http://gamadu.com/artemis/) framework
 

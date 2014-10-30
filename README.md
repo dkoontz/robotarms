@@ -28,7 +28,7 @@ We were originally inspired to write RobotArms after using the [Artemis](http://
 
 The implementation of the steps outlined in this tutorial can be found in the docs/UnityAsteroidsExample folder.
 
-To use RobotArms you will create one or more Components and then create one or more Processors to operate on those components. Let us consider a game like Asteroids and the data we would need.
+To use RobotArms you will create one or more Components and then create one or more Processors to operate on those components. Let us consider the ship from a game like Asteroids and the data we would need.
 
 * Ship
   * Position
@@ -46,18 +46,23 @@ If you were writing this in regular Unity you would probably create a Ship MonoB
 
 In RobotArms you would definitely want three separate components, one for the movement, one for the ship data, and one for the input. The position is taken care of thanks to Unity's Transform component. This leaves us with just Velocity to track for our movement component. For the ship we have rotation, rotation speed, current fuel (max fuel also if we can gain fuel), fuel consumption rate, and the thrust force. Facing can be retrieved from the Transform using something standard like the forward (z) vector as our facing. In 2d we'd have a similar concept but it would usually be the up (y) vector instead. For player input we could record the raw button presses or map that to something a bit more game specific. In this example I've chosen to go with a more game specific representation.
 
-Here are the components with broken out with the data each one will store
+#### Components and their fields ####
+
+Here are the components with broken out with the data each one will store.
 
 * VectoredMovement
-  * Velocity
+  - Velocity
 * Ship
-  * Turn speed
-  * Fuel
-  * Fuel consumption rate
-  * Thrust force
+  - Turn speed
+  - Fuel
+  - Max fuel
+  - Fuel consumption rate
+  - Thrust force
 * PlayerInput
-  * Thrusting yes/no
-  * Rotation input as a float representing how much to rotate from -1 = counterclockwise to 1 = clockwise
+  - Thrusting yes/no
+  - Rotation input as a float representing how much to rotate from -1 = counterclockwise to 1 = clockwise
+
+#### Component implementation ####
 
 ```cs
 using UnityEngine;
@@ -75,6 +80,7 @@ using RobotArms;
 public class Ship : RobotArmsComponent {
 	public float RotationSpeed;
 	public float Fuel;
+	public float MaxFuel;
 	public float FuelConsumptionPerSecond;
 	public float ThrustForce;
 }
@@ -90,7 +96,11 @@ public class PlayerInput : RobotArmsComponent {
 }
 ```
 
-RobotArmsComponent is just a subclass of MonoBehaviour that does all the registering of the component with the system for you. Components by themselves don't do anything, so now we can add in a processor to start adding functionality to our game. The simplest element of this game is probably the vectored movement. We simply translate the GameObject based on the velocity vector. This sounds like a VectoredMovementProcessor to me.
+RobotArmsComponent is just a subclass of MonoBehaviour that does all the registering of the component with the system for you. Components by themselves don't do anything, so now we can add in a processor to start adding functionality to our game.
+
+#### Processors ####
+
+The simplest element of this game is probably the vectored movement. We simply translate the GameObject based on the velocity vector. This sounds like a VectoredMovementProcessor to me.
 
 ```cs
 using UnityEngine;
@@ -151,6 +161,55 @@ public class ShipMovementProcessor : RobotArmsProcessor {
 ```
 Here we have an example of a processor that requires 3 different components. Only a GameObject that has all three of these components will be passed in to this processor, so asteroids floating around with VectoredMovement components will never show up here, nor will enemy ships with Ship and VectoredMovement components but not a PlayerInput component. Add the Ship component to your ship GameObject, set some values for the rotation speed, fuel, fuel consumption rate, and thrust force and hit play.
 
+#### Ship UI ####
+
+Currently the player has no way of knowing how much fuel they have left or when their thruster is active. To rectify this we can display one or more graphics on the screen to represent the remaining fuel and and effect for thrusting. For the fuel display I chose to use 10 sprites, each representing 10% of the ship's fuel supply. For the thrusting effect I simply positioned a sprite that can be turned on and off according to the player's input. After positioning the sprites on-screen we need some way to reference them.
+
+```cs
+using UnityEngine;
+using RobotArms;
+
+public class ShipDisplay : RobotArmsComponent {
+	public SpriteRenderer[] FuelIcons;
+	public SpriteRenderer Thruster;
+}
+```
+Attach the ShipDisplay component to your ship and add in whatever graphics you wish for the fuel and thruster.
+
+Next we'll need to modify these sprites based on the state of the ship, sounds like a ShipDisplayProcessor to me. To make the usage of fuel feel a little more immediate I chose to scale down the pips as you consume fuel.
+
+```cs
+using UnityEngine;
+using RobotArms;
+
+[ProcessorOptions(typeof(Ship), typeof(ShipDisplay), typeof(PlayerInput))]
+public class ShipDisplayProcessor : RobotArmsProcessor {
+	public override void Process (GameObject entity) {
+		var ship = entity.GetComponent<Ship>();
+		var display = entity.GetComponent<ShipDisplay>();
+		var input = entity.GetComponent<PlayerInput>();
+
+		var fuelPercent = Mathf.Clamp(ship.Fuel / ship.MaxFuel, 0, 1);
+		var fuelPipsToShow = Mathf.FloorToInt(fuelPercent * display.FuelIcons.Length);
+		var fuelPerPip = ship.MaxFuel / display.FuelIcons.Length;
+		for (var i = 0; i < display.FuelIcons.Length; ++i) {
+			display.FuelIcons[i].renderer.enabled = i <= fuelPipsToShow;
+
+			if (fuelPipsToShow == i) {
+				display.FuelIcons[fuelPipsToShow].transform.localScale = new Vector3(1, ship.Fuel % fuelPerPip, 1);
+			}
+			else {
+				display.FuelIcons[i].transform.localScale = Vector3.one;
+			}
+		}
+
+		display.Thruster.renderer.enabled = input.Thrust;
+	}
+}
+```
+
+This processor is certainly the most complex, but as you probably know, display logic is often the messiest part of an app. What's great about the RobotArms approach is there's very little temptation to mix the logic in ShipProcessor with ShipDisplayProcessor.
+
 So there we go. It's not a huge project but hopefully this has given you a taste of how RobotArms is different and perhaps how it can make your Unity development more productive.
 
 ### Caveats ###
@@ -161,38 +220,16 @@ So there we go. It's not a huge project but hopefully this has given you a taste
 
 ### License ###
 
-<pre>
-This project is licensed under The MIT License (MIT)
-
+This project is licensed under The MIT License
 Copyright 2014 David Koontz, Trenton Kennedy
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
-  
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-   THE SOFTWARE.
 
 Please direct questions, patches, and suggestions to the project page at
 https://bitbucket.org/dkoontz/robotarms
-</pre>
 
 ### External Projects ###
 
 The demo project uses sprites provided by Kenney Vleugels (www.kenney.nl)  
 http://opengameart.org/content/space-shooter-redux
-
 
 ### Contact ###
 

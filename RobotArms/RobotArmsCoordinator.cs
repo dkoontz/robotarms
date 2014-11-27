@@ -31,14 +31,17 @@ using UnityEngine;
 
 namespace RobotArms {
 	public class RobotArmsCoordinator : MonoBehaviour, IRobotArmsCoordinator {
+		public const string DEFAULT_TAG = "Untagged";
+
 		public MonoBehaviour Blackboard;
-		[HideInInspector] public List<string> EnabledProcessorTags = new List<string> { "Untagged" };
+		[HideInInspector] public List<string> EnabledProcessorTags = new List<string> { DEFAULT_TAG };
 
 		RobotArmsProcessor[] processors;
 		RobotArmsProcessor[] updateProcessors;
 		RobotArmsProcessor[] fixedUpdateProcessors;
 		RobotArmsProcessor[] lateUpdateProcessors;
 		Dictionary<RobotArmsProcessor, HashSet<GameObject>> entitiesForProcessors;
+		Dictionary<RobotArmsProcessor, HashSet<GameObject>> entitiesForProcessorsToInitialize;
 	    readonly HashSet<RobotArmsComponent> components = new HashSet<RobotArmsComponent>();
 	    readonly Queue<GameObject> entitiesWithComponentsThatWereRemoved = new Queue<GameObject>();
 	    readonly Queue<Action> actionsToRunAtEndOfCurrentUpdateType = new Queue<Action>();
@@ -60,7 +63,7 @@ namespace RobotArms {
 			processors = processorTypes
 				.Where(type => EnabledProcessorTags.Contains((type.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true)[0] as ProcessorOptionsAttribute).Tag))
 				.Select(type => Activator.CreateInstance(type) as RobotArmsProcessor)
-				.OrderBy(p => -p.Options.Priority)
+				.OrderBy(p => p.Options.Priority)
 				.ToArray();
 
 			foreach (var p in processors) {
@@ -69,8 +72,11 @@ namespace RobotArms {
 			}
 
 			entitiesForProcessors = new Dictionary<RobotArmsProcessor, HashSet<GameObject>>(processors.Length);
+			entitiesForProcessorsToInitialize = new Dictionary<RobotArmsProcessor, HashSet<GameObject>>(processors.Length);
+
 			foreach (var p in processors) {
 				entitiesForProcessors[p] = new HashSet<GameObject>();
+				entitiesForProcessorsToInitialize[p] = new HashSet<GameObject>();
 			}
 			updateProcessors = processors.Where(p => p.Options.Phase == UpdateType.Update).ToArray();
 			fixedUpdateProcessors = processors.Where(p => p.Options.Phase == UpdateType.FixedUpdate).ToArray();
@@ -88,6 +94,7 @@ namespace RobotArms {
 			components.Add(component);
 			foreach (var p in processors.Where(p => p.IsInterestedIn(component.gameObject))) {
 				entitiesForProcessors[p].Add(component.gameObject);
+				entitiesForProcessorsToInitialize[p].Add(component.gameObject);
 			}
 		}
 
@@ -120,8 +127,15 @@ namespace RobotArms {
 			RunProcessors(lateUpdateProcessors);
 		}
 
-		void RunProcessors(IEnumerable<RobotArmsProcessor> robotArmsProcessors) {
+		void RunProcessors(RobotArmsProcessor[] robotArmsProcessors) {
 			RemovePendingComponents();
+
+			foreach (var p in robotArmsProcessors) {
+				if (entitiesForProcessorsToInitialize.Count > 0 && (p.IsActive == null || p.IsActive())) {
+					p.InitializeAll(entitiesForProcessorsToInitialize[p]);
+					entitiesForProcessorsToInitialize[p].Clear();
+				}
+			}
 
 			foreach (var p in robotArmsProcessors) {
 				if (p.IsActive == null || p.IsActive()) {

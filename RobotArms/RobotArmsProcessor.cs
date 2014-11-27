@@ -53,12 +53,12 @@ namespace RobotArms {
 			}
 		}
 
-		public ProcessorOptionsAttribute(params Type[] requiredTypes) : this ("Untagged", UpdateType.Update, 0, requiredTypes) { }
-		public ProcessorOptionsAttribute(string tag, params Type[] requiredTypes) : this (tag, UpdateType.Update, 0, requiredTypes) { }
-		public ProcessorOptionsAttribute(UpdateType phase, params Type[] requiredTypes) : this("Untagged", phase, 0, requiredTypes) { }
-		public ProcessorOptionsAttribute(string tag, UpdateType phase, params Type[] requiredTypes) : this(tag, phase, 0, requiredTypes) { }
-		public ProcessorOptionsAttribute(int priority = 0, params Type[] requiredTypes) : this ("Untagged", UpdateType.Update, priority, requiredTypes) { }
-		public ProcessorOptionsAttribute(string tag, int priority = 0, params Type[] requiredTypes) : this (tag, UpdateType.Update, priority, requiredTypes) { }
+		public ProcessorOptionsAttribute(params Type[] requiredTypes) : this(RobotArmsCoordinator.DEFAULT_TAG, UpdateType.Update, 0, requiredTypes) {}
+		public ProcessorOptionsAttribute(string tag, params Type[] requiredTypes) : this(tag, UpdateType.Update, 0, requiredTypes) {}
+		public ProcessorOptionsAttribute(UpdateType phase, params Type[] requiredTypes) : this(RobotArmsCoordinator.DEFAULT_TAG, phase, 0, requiredTypes) {}
+		public ProcessorOptionsAttribute(string tag, UpdateType phase, params Type[] requiredTypes) : this(tag, phase, 0, requiredTypes) {}
+		public ProcessorOptionsAttribute(int priority, params Type[] requiredTypes) : this(RobotArmsCoordinator.DEFAULT_TAG, UpdateType.Update, priority, requiredTypes) {}
+		public ProcessorOptionsAttribute(string tag, int priority, params Type[] requiredTypes) : this(tag, UpdateType.Update, priority, requiredTypes) {}
 	}
 
 	public class RobotArmsProcessor {
@@ -77,6 +77,14 @@ namespace RobotArms {
 
 		public bool IsInterestedIn(GameObject entity) {
 			return Options.RequiredTypes.All(type => entity != null && entity.GetComponent(type) != null);
+		}
+
+		public virtual void Initialize(GameObject entity) { }
+
+		public virtual void InitializeAll(IEnumerable<GameObject> entities) {
+			foreach (var entity in entities) {
+				Initialize(entity);
+			}
 		}
 
 		public virtual void Process(GameObject entity) { }

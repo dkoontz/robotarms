@@ -110,7 +110,7 @@ using RobotArms;
 public class VectoredMovementProcessor : RobotArmsProcessor {
 	public override void Process (GameObject entity) {
 		var movement = entity.GetComponent<VectoredMovement>();
-		entity.transform.Translate(movement.Velocity * Time.deltaTime);
+		entity.transform.Translate(movement.Velocity * Time.deltaTime, Space.World);
 	}
 }
 ```

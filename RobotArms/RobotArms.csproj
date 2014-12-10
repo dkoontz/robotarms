@@ -8,8 +8,6 @@
     <RootNamespace>RobotArms</RootNamespace>
     <AssemblyName>RobotArms</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,6 +39,16 @@
     <Compile Include="RobotArmsComponent.cs" />
     <Compile Include="RobotArmsCoordinator.cs" />
     <Compile Include="RobotArmsProcessor.cs" />
+    <Compile Include="Components\ContinuousMovement.cs" />
+    <Compile Include="Components\DelayedAction.cs" />
+    <Compile Include="Components\Expirable.cs" />
+    <Compile Include="Processors\ContinuousMovementProcessor.cs" />
+    <Compile Include="Processors\DelayedActionProcessor.cs" />
+    <Compile Include="Processors\ExpirableProcessor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Components\" />
+    <Folder Include="Processors\" />
+  </ItemGroup>
 </Project>

@@ -33,22 +33,45 @@ namespace RobotArms {
 		// from being registered with RobotArms. This is useful for situations
 		// where the object is created but not yet active such as with an object pool
 		protected bool autoRegister = true;
+		protected bool reRegisterOnSceneLoad;
 
-		public void Start() {
+		public void Awake() {
 			Initialize();
-
-			if (autoRegister) {
-				RobotArmsCoordinator.RegisterComponent(this);
-			}
 		}
 
-		public void OnDestroy() {
+		public void OnEnable() {
+			RegisterComponent();
+		}
+
+		// This is needed for the very first update since Unity will call
+		// Awake and OnEnable of a GameObject during the Instantiate call
+		// before other objects can run their Awake, therefore the RobotArmsCoordinator
+		// will not be set yet and we need to run the registration later
+		// when we can guarantee that reference is set. On all subsequent
+		// enable/disables OnEnable will function correctly.
+		public void Start() {
+			RegisterComponent();
+		}
+
+		public void OnDisable() {
 			RobotArmsCoordinator.UnregisterComponent(this);
 		}
 
+		public void OnLevelWasLoaded(int levelId) {
+			if (reRegisterOnSceneLoad) {
+				RegisterComponent();
+			}
+		}
+
 		/// <summary>
-		/// Called before component is registered with any processors.
+		/// Called before component registers itself with RobotArms.
 		/// </summary>
 		protected virtual void Initialize() { }
+
+		void RegisterComponent() {
+			if (autoRegister && RobotArmsCoordinator != null) {
+				RobotArmsCoordinator.RegisterComponent(this);
+			}
+		}
 	}
 }

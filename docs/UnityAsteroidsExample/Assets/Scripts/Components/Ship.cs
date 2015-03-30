@@ -7,4 +7,6 @@ public class Ship : RobotArmsComponent {
 	public float MaxFuel;
 	public float FuelConsumptionPerSecond;
 	public float ThrustForce;
+	public float MaxSpeed;
+	public GameObject Projectile;
 }

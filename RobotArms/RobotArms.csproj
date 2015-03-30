@@ -30,7 +30,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\lib\UnityEngine.dll</HintPath>
+      <HintPath>..\lib\UnityEngine.5.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +45,7 @@
     <Compile Include="Processors\ContinuousMovementProcessor.cs" />
     <Compile Include="Processors\DelayedActionProcessor.cs" />
     <Compile Include="Processors\ExpirableProcessor.cs" />
+    <Compile Include="RobotArmsUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

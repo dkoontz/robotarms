@@ -64,7 +64,6 @@ namespace RobotArms {
 	public class RobotArmsProcessor {
 		public ProcessorOptionsAttribute Options { get; private set; }
 		public Func<bool> IsActive { get; protected set; }
-		internal IRobotArmsCoordinator Coordinator { private get; set; }
 		internal object Blackboard { private get; set; }
 
 		public RobotArmsProcessor() {
@@ -76,7 +75,15 @@ namespace RobotArms {
 		}
 
 		public bool IsInterestedIn(GameObject entity) {
-			return Options.RequiredTypes.All(type => entity != null && entity.GetComponent(type) != null);
+
+			if (entity == null) {
+				return false;
+			}
+
+			return Options.RequiredTypes.All(type => {
+				var component = entity.GetComponent(type) as MonoBehaviour;
+				return component != null && component.enabled;
+			});
 		}
 
 		public virtual void Initialize(GameObject entity) { }
@@ -97,26 +104,6 @@ namespace RobotArms {
 
 		public T GetBlackboard<T>() where T : MonoBehaviour {
 			return (T)Blackboard;
-		}
-
-		public void RunAtEndOfFrame(Action action) {
-			Coordinator.RunAtEndOfFrame(action);
-		}
-
-		public void RunAtEndOfCurrentUpdateType(Action action) {
-			Coordinator.RunAtEndOfCurrentUpdateType(action);
-		}
-
-		public void DestroyComponent(RobotArmsComponent component) {
-			Coordinator.RunAtEndOfCurrentUpdateType(() => GameObject.Destroy(component));
-		}
-
-		public void DestroyGameObject(GameObject gameObject) {
-			Coordinator.RunAtEndOfCurrentUpdateType(() => GameObject.Destroy(gameObject));
-		}
-
-		public T[] GetAllComponentsOfType<T>() where T : RobotArmsComponent {
-			return Coordinator.GetAllComponentsOfType<T>();
 		}
 	}
 }

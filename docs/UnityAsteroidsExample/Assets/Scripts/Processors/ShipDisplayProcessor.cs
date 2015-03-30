@@ -3,6 +3,7 @@ using RobotArms;
 
 [ProcessorOptions(typeof(Ship), typeof(ShipDisplay), typeof(PlayerInput))]
 public class ShipDisplayProcessor : RobotArmsProcessor {
+	
 	public override void Process (GameObject entity) {
 		var ship = entity.GetComponent<Ship>();
 		var display = entity.GetComponent<ShipDisplay>();
@@ -12,7 +13,7 @@ public class ShipDisplayProcessor : RobotArmsProcessor {
 		var fuelPipsToShow = Mathf.FloorToInt(fuelPercent * display.FuelIcons.Length);
 		var fuelPerPip = ship.MaxFuel / display.FuelIcons.Length;
 		for (var i = 0; i < display.FuelIcons.Length; ++i) {
-			display.FuelIcons[i].renderer.enabled = i <= fuelPipsToShow;
+			display.FuelIcons[i].GetComponent<Renderer>().enabled = i <= fuelPipsToShow;
 
 			if (fuelPipsToShow == i) {
 				display.FuelIcons[fuelPipsToShow].transform.localScale = new Vector3(1, ship.Fuel % fuelPerPip, 1);
@@ -22,6 +23,6 @@ public class ShipDisplayProcessor : RobotArmsProcessor {
 			}
 		}
 
-		display.Thruster.renderer.enabled = input.Thrust;
+		display.Thruster.GetComponent<Renderer>().enabled = input.Thrust;
 	}
 }

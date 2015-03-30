@@ -38,6 +38,7 @@ public class ShipMovementProcessor : RobotArmsProcessor {
 			RobotArmsUtils.RunAtEndOfFrame(() => {
 				GameObject.Instantiate(destroyable.DestroyedEffect, entity.transform.position, entity.transform.rotation);	
 				GameObject.Destroy(entity);
+				GetBlackboard<Blackboard>().GameOverScreen.SetActive(true);
 			});
 		}
 	}

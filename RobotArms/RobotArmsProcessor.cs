@@ -90,7 +90,9 @@ namespace RobotArms {
 
 		public virtual void InitializeAll(IEnumerable<GameObject> entities) {
 			foreach (var entity in entities) {
-				Initialize(entity);
+				if (entity != null) {
+					Initialize(entity);					
+				}
 			}
 		}
 
@@ -98,7 +100,9 @@ namespace RobotArms {
 
 		public virtual void ProcessAll(IEnumerable<GameObject> entities) {
 			foreach (var entity in entities) {
-				Process(entity);
+				if (entity != null) {
+					Process(entity);					
+				}
 			}
 		}
 

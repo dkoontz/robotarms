@@ -100,7 +100,6 @@ namespace RobotArms {
 			// Initialize/InitializeAll on processors when a component is added
 			// that the processor does not care about while the entity
 			// IS of interest to the processor
-//			Debug.Log("Registering component: " + component.GetType() + " from game object " + component.gameObject.name);
 			foreach (var p in processors.Where(p => p.Options.RequiredTypes.Contains(component.GetType()) && p.IsInterestedIn(component.gameObject))) {
 				AddDistinct(entitiesForProcessors[p], component.gameObject);
 				AddDistinct(entitiesForProcessorsToInitialize[p], component.gameObject);

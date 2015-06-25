@@ -5,21 +5,14 @@ using System.Linq;
 using RobotArms;
 using UnityEngine.UI;
 
-[ProcessorOptions(typeof(Asteroid), typeof(VectoredMovement), typeof(Destroyable))]
-public class AsteroidProcessor : RobotArmsProcessor {
+public class AsteroidProcessor : RobotArmsProcessor<Asteroid, VectoredMovement, Destroyable> {
 
-	public override void Initialize(GameObject entity) {
-		var asteroid = entity.GetComponent<Asteroid>();
-		var vectoredMovement = entity.GetComponent<VectoredMovement>();
-
+	public override void Initialize(GameObject entity, Asteroid asteroid, VectoredMovement vectoredMovement, Destroyable destroyable) {
 		SetSpriteAndBoundsForCurrentSize(asteroid);
 		RandomizeAsteroidMovement(vectoredMovement);
 	}
 
-	public override void Process(GameObject entity) {
-		var asteroid = entity.GetComponent<Asteroid>();
-		var vectoredMovement = entity.GetComponent<VectoredMovement>();
-		var destroyable = entity.GetComponent<Destroyable>();
+	public override void Process(GameObject entity, Asteroid asteroid, VectoredMovement vectoredMovement, Destroyable destroyable) {
 		var asteroidRoot = GetBlackboard<Blackboard>().AsteroidRoot;
 
 		if (destroyable.Destroyed) {

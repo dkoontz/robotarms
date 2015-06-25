@@ -1,12 +1,9 @@
 ﻿using UnityEngine;
 using RobotArms;
 
-[ProcessorOptions (typeof(VectoredMovement))]
-public class ScreenWrapProcessor : RobotArmsProcessor {
+public class ScreenWrapProcessor : RobotArmsProcessor<VectoredMovement> {
 
-	public override void Process (GameObject entity) {
-		var vectoredMovement = entity.GetComponent<VectoredMovement>();
-		
+	public override void Process (GameObject entity, VectoredMovement vectoredMovement) {
 		var viewportPosition = Camera.main.WorldToViewportPoint(vectoredMovement.transform.position);
 		if (viewportPosition.x < 0) {
 			viewportPosition.x = 1;

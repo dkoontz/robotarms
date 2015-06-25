@@ -30,6 +30,11 @@ using System.Linq;
 using UnityEngine;
 
 namespace RobotArms {
+	public class EntityAndComponents {
+		public GameObject Entity;
+		public Component[] Components;
+	}
+
 	public class RobotArmsCoordinator : MonoBehaviour, IRobotArmsCoordinator {
 		public const string DEFAULT_TAG = "Untagged";
 
@@ -41,10 +46,12 @@ namespace RobotArms {
 		RobotArmsProcessor[] fixedUpdateProcessors;
 		RobotArmsProcessor[] lateUpdateProcessors;
 
+		Dictionary<RobotArmsProcessor, List<EntityAndComponents>> entitiesForProcessors;
+//		Dictionary<RobotArmsProcessor, Dictionary<GameObject, List<Component>>> entitiesForProcessors;
 		// We can't use a HashSet for the entity list due to this bug
 		// http://fogbugz.unity3d.com/default.asp?676743_ro5i82m19hb8tom8
-		Dictionary<RobotArmsProcessor, List<GameObject>> entitiesForProcessors;
-		Dictionary<RobotArmsProcessor, List<GameObject>> entitiesForProcessorsToInitialize;
+//		Dictionary<RobotArmsProcessor, List<GameObject>> entitiesForProcessorsToInitialize;
+		Dictionary<RobotArmsProcessor, List<EntityAndComponents>> entitiesForProcessorsToInitialize;
 	    
 		readonly HashSet<RobotArmsComponent> components = new HashSet<RobotArmsComponent>();
 	    readonly Queue<GameObject> entitiesWithComponentsThatWereRemoved = new Queue<GameObject>();
@@ -52,20 +59,23 @@ namespace RobotArms {
 	    readonly Queue<Action> actionsToRunAtEndOfFrame = new Queue<Action>();
 
 		public void Awake() {
-			if (Blackboard == null) {
-				Debug.LogWarning("A blackboard component was not specified");
-			}
-
 			if (EnabledProcessorTags == null) {
 				EnabledProcessorTags = new List<string> { "Untagged" };
 			}
 
 			var processorTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(
-				assembly => assembly.GetTypes().Where(
-					type => type.IsSubclassOf(typeof(RobotArmsProcessor))));
+	        	assembly => assembly.GetTypes().Where(
+//					type => type.GetInterfaces().Contains(typeof(IRobotArmsProcessor))));
+//	            	type => type.IsAssignableFrom(typeof(IRobotArmsProcessor))));
+					type => type.IsSubclassOf(typeof(RobotArmsProcessor)) && !type.IsAbstract));
 
 			processors = processorTypes
-				.Where(type => EnabledProcessorTags.Contains((type.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true)[0] as ProcessorOptionsAttribute).Tag))
+				.Where(type => {
+					var attributes = type.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true);
+					var processorTag = attributes.Length > 0 
+						? ((ProcessorOptionsAttribute)attributes[0]).Tag
+						: DEFAULT_TAG;
+					return EnabledProcessorTags.Contains(processorTag); })
 				.Select(type => Activator.CreateInstance(type) as RobotArmsProcessor)
 				.OrderBy(p => p.Options.Priority)
 				.ToArray();
@@ -74,13 +84,17 @@ namespace RobotArms {
 				p.Blackboard = Blackboard;
 			}
 
-			entitiesForProcessors = new Dictionary<RobotArmsProcessor, List<GameObject>>(processors.Length);
-			entitiesForProcessorsToInitialize = new Dictionary<RobotArmsProcessor, List<GameObject>>(processors.Length);
+			entitiesForProcessors = new Dictionary<RobotArmsProcessor, List<EntityAndComponents>>(processors.Length);
+//			entitiesForProcessors = new Dictionary<RobotArmsProcessor, Dictionary<GameObject, List<Component>>>(processors.Length);
+			entitiesForProcessorsToInitialize = new Dictionary<RobotArmsProcessor, List<EntityAndComponents>>(processors.Length);
 
 			foreach (var p in processors) {
-				entitiesForProcessors[p] = new List<GameObject>();
-				entitiesForProcessorsToInitialize[p] = new List<GameObject>();
+//				entitiesForProcessors[p] = new Dictionary<GameObject, List<Component>>();
+				entitiesForProcessors[p] = new List<EntityAndComponents>();
+//				entitiesForProcessorsToInitialize[p] = new List<GameObject>();
+				entitiesForProcessorsToInitialize[p] = new List<EntityAndComponents>();
 			}
+
 			updateProcessors = processors.Where(p => p.Options.Phase == UpdateType.Update).ToArray();
 			fixedUpdateProcessors = processors.Where(p => p.Options.Phase == UpdateType.FixedUpdate).ToArray();
 			lateUpdateProcessors = processors.Where(p => p.Options.Phase == UpdateType.LateUpdate).ToArray();
@@ -96,15 +110,30 @@ namespace RobotArms {
 
 		public void RegisterComponent(RobotArmsComponent component) {
 			components.Add(component);
-			// Checking the specific required types prevents calling 
-			// Initialize/InitializeAll on processors when a component is added
-			// that the processor does not care about while the entity
-			// IS of interest to the processor
-			foreach (var p in processors.Where(p => p.Options.RequiredTypes.Contains(component.GetType()) && p.IsInterestedIn(component.gameObject))) {
-				AddDistinct(entitiesForProcessors[p], component.gameObject);
-				AddDistinct(entitiesForProcessorsToInitialize[p], component.gameObject);
-			}
 
+			var entity = component.gameObject;
+
+			foreach (var p in processors.Where(p => p.RequiredTypes.Contains(component.GetType()) && p.IsInterestedIn(entity))) {
+				EntityAndComponents current = entitiesForProcessors[p].FirstOrDefault(e => e.Entity == entity);
+				if (current == null) {
+					current = new EntityAndComponents {
+						Entity = entity
+					};
+					entitiesForProcessors[p].Add(current);
+				}
+					
+				var componentTypes = p.GetType().BaseType.GetGenericArguments();
+				current.Components = new Component[componentTypes.Length];
+
+				for (var i = 0; i < componentTypes.Length; ++i) {
+					current.Components[i] = entity.GetComponent(componentTypes[i]);
+				}
+
+				if (!entitiesForProcessorsToInitialize[p].Any(e => e.Entity == entity)) {
+					entitiesForProcessorsToInitialize[p].Add(current);
+				}
+//				AddDistinct(entitiesForProcessorsToInitialize[p], current);
+			}
 		}
 
 		public void UnregisterComponent(RobotArmsComponent component) {
@@ -149,8 +178,11 @@ namespace RobotArms {
 			foreach (var p in robotArmsProcessors) {
 				if (p.IsActive == null || p.IsActive()) {
 					var entities = entitiesForProcessors[p];
-					entities.RemoveAll(e => e == null);
+					entities.RemoveAll(e => e.Entity == null);
+//					entities.Remove(null);
+
 					p.ProcessAll(entities);
+//					p.ProcessAll(entities);
 				}
 			}
 
@@ -164,9 +196,9 @@ namespace RobotArms {
 					var processor = kvp.Key;
 					var entitiesForProcessor = kvp.Value;
 
-					entitiesForProcessor.RemoveAll(e => e == null);
-					if (entitiesForProcessor.Contains(entity) && !processor.IsInterestedIn(entity)) {
-						entitiesForProcessor.Remove(entity);
+					entitiesForProcessor.RemoveAll(e => e.Entity == null);
+					if (entitiesForProcessor.Any(e => e.Entity == entity) && !processor.IsInterestedIn(entity)) {
+						entitiesForProcessor.RemoveAll(e => e.Entity == entity);
 					}
 				}
 			}
@@ -184,12 +216,6 @@ namespace RobotArms {
 				while (actionsToRunAtEndOfFrame.Count > 0) {
 					actionsToRunAtEndOfFrame.Dequeue()();
 				}
-			}
-		}
-
-		static void AddDistinct<T>(IList<T> list, T element) {
-			if (!list.Contains(element)) {
-				list.Add(element);
 			}
 		}
 	}

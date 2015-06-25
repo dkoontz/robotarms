@@ -2,16 +2,9 @@
 using UnityEngine;
 using RobotArms;
 
-[ProcessorOptions(typeof(Ship), typeof(PlayerInput), typeof(VectoredMovement), typeof(Trigger2D))]
-public class ShipMovementProcessor : RobotArmsProcessor {
+public class ShipMovementProcessor : RobotArmsProcessor<Ship, PlayerInput, VectoredMovement, Trigger2D, Destroyable> {
 	
-	public override void Process (GameObject entity) {
-		var input = entity.GetComponent<PlayerInput>();
-		var ship = entity.GetComponent<Ship>();
-		var movement = entity.GetComponent<VectoredMovement>();
-		var trigger = entity.GetComponent<Trigger2D>();
-		var destroyable = entity.GetComponent<Destroyable>();
-
+	public override void Process (GameObject entity, Ship ship, PlayerInput input, VectoredMovement movement, Trigger2D trigger, Destroyable destroyable) {
 		if (ship.Fuel > 0) {
 			if (input.Thrust) {
 				movement.Velocity += entity.transform.up * ship.ThrustForce * Time.deltaTime;

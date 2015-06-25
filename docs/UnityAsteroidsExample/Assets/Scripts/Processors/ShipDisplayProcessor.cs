@@ -1,14 +1,9 @@
 ﻿using UnityEngine;
 using RobotArms;
 
-[ProcessorOptions(typeof(Ship), typeof(ShipDisplay), typeof(PlayerInput))]
-public class ShipDisplayProcessor : RobotArmsProcessor {
+public class ShipDisplayProcessor : RobotArmsProcessor<Ship, ShipDisplay, PlayerInput> {
 	
-	public override void Process (GameObject entity) {
-		var ship = entity.GetComponent<Ship>();
-		var display = entity.GetComponent<ShipDisplay>();
-		var input = entity.GetComponent<PlayerInput>();
-
+	public override void Process (GameObject entity, Ship ship, ShipDisplay display, PlayerInput input) {
 		var fuelPercent = Mathf.Clamp(ship.Fuel / ship.MaxFuel, 0, 1);
 		var fuelPipsToShow = Mathf.FloorToInt(fuelPercent * display.FuelIcons.Length);
 		var fuelPerPip = ship.MaxFuel / display.FuelIcons.Length;

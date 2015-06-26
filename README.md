@@ -116,10 +116,8 @@ The simplest element of this game is probably the vectored movement. We simply t
 using UnityEngine;
 using RobotArms;
 
-[ProcessorOptions(typeof(VectoredMovement))]
-public class VectoredMovementProcessor : RobotArmsProcessor {
-	public override void Process (GameObject entity) {
-		var movement = entity.GetComponent<VectoredMovement>();
+public class VectoredMovementProcessor : RobotArmsProcessor<VectoredMovement> {
+	public override void Process (GameObject entity, VectoredMovement movement) {
 		entity.transform.Translate(movement.Velocity * Time.deltaTime, Space.World);
 	}
 }
@@ -137,10 +135,8 @@ Next let's write a processor that reads input and sets the values on the PlayerI
 using UnityEngine;
 using RobotArms;
 
-[ProcessorOptions(typeof(PlayerInput))]
-public class PlayerInputProcessor : RobotArmsProcessor {
-	public override void Process (GameObject entity) {
-		var input = entity.GetComponent<PlayerInput>();
+public class PlayerInputProcessor : RobotArmsProcessor<PlayerInput> {
+	public override void Process (GameObject entity, PlayerInput input) {
 		input.Thrust = Input.GetAxis("Vertical") > 0;
 		input.Rotation = Input.GetAxis("Horizontal");
 	}
@@ -153,13 +149,8 @@ Go ahead and attach the PlayerInput component to your ship GameObject and run th
 using UnityEngine;
 using RobotArms;
 
-[ProcessorOptions(typeof(Ship), typeof(PlayerInput), typeof(VectoredMovement))]
-public class ShipMovementProcessor : RobotArmsProcessor {
-	public override void Process (GameObject entity) {
-		var input = entity.GetComponent<PlayerInput>();
-		var ship = entity.GetComponent<Ship>();
-		var movement = entity.GetComponent<VectoredMovement>();
-
+public class ShipMovementProcessor : RobotArmsProcessor<Ship, PlayerInput, VectoredMovement> {
+	public override void Process (GameObject entity, Ship ship, PlayerInput input, VectoredMovement movement) {
 		if (ship.Fuel > 0) {
 			if (input.Thrust) {
 				movement.Velocity += entity.transform.up * ship.ThrustForce * Time.deltaTime;
@@ -194,13 +185,8 @@ Next we'll need to modify these sprites based on the state of the ship, sounds l
 using UnityEngine;
 using RobotArms;
 
-[ProcessorOptions(typeof(Ship), typeof(ShipDisplay), typeof(PlayerInput))]
-public class ShipDisplayProcessor : RobotArmsProcessor {
-	public override void Process (GameObject entity) {
-		var ship = entity.GetComponent<Ship>();
-		var display = entity.GetComponent<ShipDisplay>();
-		var input = entity.GetComponent<PlayerInput>();
-
+public class ShipDisplayProcessor : RobotArmsProcessor<Ship, ShipDisplay, PlayerInput> {
+	public override void Process (GameObject entity, Ship ship, ShipDisplay display, PlayerInput input) {
 		var fuelPercent = Mathf.Clamp(ship.Fuel / ship.MaxFuel, 0, 1);
 		var fuelPipsToShow = Mathf.FloorToInt(fuelPercent * display.FuelIcons.Length);
 		var fuelPerPip = ship.MaxFuel / display.FuelIcons.Length;
@@ -227,7 +213,6 @@ So there we go. It's not a huge project but hopefully this has given you a taste
 ### Caveats ###
 
 1. We are using Linq and foreach. If this aggravates your hyper-optimizing self and you want to rewrite everything to have absolutely zero memory allocation, patches are accepted. RobotArms has shown to be very trivial in our profiling, even on mobile.
-2. Yes, we expect you to use GetComponent EVERY FRAME. I'm sure you've all been told how GetComponent is the devil and will make your application slow to a crawl. Go profile it, you'll probably be surprised. At one point I tried to add some optimizations to RobotArms to cache the component so that each frame you could retrieve it from a dictionary instead of calling GetComponent, turns out the Dictionary's direct lookup (not even TryGetValue) is SLOWER than GetComponent (at least on my system and in my tests), YMMV. RobotArms is optimized for programmer efficiency, with all the time you save you can profile your game and **then** go optimize the parts that are **actually** slow.
 
 ### License ###
 

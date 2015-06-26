@@ -168,8 +168,6 @@ namespace RobotArms {
 			foreach (var p in robotArmsProcessors) {
 				if (p.IsActive == null || p.IsActive()) {
 					var entities = entitiesForProcessors[p];
-					entities.RemoveAll(e => e.Entity == null);
-
 					p.ProcessAll(entities);
 				}
 			}

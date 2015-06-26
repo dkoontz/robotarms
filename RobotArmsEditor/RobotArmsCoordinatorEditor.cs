@@ -8,22 +8,22 @@ namespace RobotArms {
 	[CustomEditor(typeof(RobotArmsCoordinator))]
 	public class RobotArmsCoordinatorEditor : Editor {
 
-		HashSet<string> tags;
-		Type[] processorTypes;
+		Dictionary<Type, string> processorTags;
 
 		public void OnEnable() {
-			processorTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(
-				assembly => assembly.GetTypes().Where(
-					type => type.IsSubclassOf(typeof(RobotArmsProcessor)))).ToArray();
+			processorTags = AppDomain.CurrentDomain.GetAssemblies()
+				.SelectMany(
+					assembly => assembly.GetTypes().Where(
+						type => type.IsSubclassOf(typeof(RobotArmsProcessor))))
+				.Where(t => !t.IsAbstract)
+				.Aggregate(new Dictionary<Type, string>(), (dict, type) => {
+					var attributes = type.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true);
 
-			foreach (var type in processorTypes) {
-				if (type.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true).Length == 0) {
-					Debug.LogError(string.Format("RobotArmsProcessor {0} requires a ProcessorOptions attribute", type));
-				}
-			}
-			tags = new HashSet<string>(
-				processorTypes.Select(processorType => (processorType.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true)[0] as ProcessorOptionsAttribute).Tag).OrderBy(t => t)
-			);
+					dict[type] = attributes.Length > 0 
+						? ((ProcessorOptionsAttribute)attributes[0]).Tag
+						: RobotArmsCoordinator.DEFAULT_TAG;
+					return dict;
+				});
 		}
 
 		public override void OnInspectorGUI() {
@@ -32,29 +32,30 @@ namespace RobotArms {
 			EditorGUILayout.Separator();
 			EditorGUILayout.BeginHorizontal(); {
 				EditorGUILayout.BeginVertical(GUILayout.ExpandWidth(false)); {
-					foreach(var t in tags) {
-						if (EditorGUILayout.ToggleLeft(t, coordinator.EnabledProcessorTags.Contains(t))) {
-							if (!coordinator.EnabledProcessorTags.Contains(t)) {
-								coordinator.EnabledProcessorTags.Add(t);
+					EditorGUILayout.LabelField("Enabled processor tags");
+					foreach(var tag in processorTags.Values.Distinct()) {
+						if (EditorGUILayout.ToggleLeft(tag, coordinator.EnabledProcessorTags.Contains(tag))) {
+							if (!coordinator.EnabledProcessorTags.Contains(tag)) {
+								coordinator.EnabledProcessorTags.Add(tag);
 							}
 						}
 						else {
-							if (coordinator.EnabledProcessorTags.Contains(t)) {
-								coordinator.EnabledProcessorTags.Remove(t);
+							if (coordinator.EnabledProcessorTags.Contains(tag)) {
+								coordinator.EnabledProcessorTags.Remove(tag);
 							}
 						}
 					}
 				} EditorGUILayout.EndVertical();
 
 				EditorGUILayout.BeginVertical(); {
+					EditorGUILayout.LabelField("Enabled processors");
 					GUILayout.TextArea(
-						string.Join(", ", 
-							processorTypes
-							.Select(type => new KeyValuePair<Type, ProcessorOptionsAttribute>(type, type.GetCustomAttributes(typeof(ProcessorOptionsAttribute), true)[0] as ProcessorOptionsAttribute))
-								.Where(kvp => coordinator.EnabledProcessorTags.Contains(kvp.Value.Tag))
-								.Select(kvp => kvp.Key.Name)
-								.ToArray()
-					));
+						string.Join("\n", 
+							processorTags
+							.Where(kvp => coordinator.EnabledProcessorTags.Contains(kvp.Value))
+							.OrderBy(kvp => kvp.Key.Name)
+							.Select(kvp => kvp.Key.Name)
+							.ToArray()));
 				} EditorGUILayout.EndVertical();
 			} EditorGUILayout.EndHorizontal();
 		}

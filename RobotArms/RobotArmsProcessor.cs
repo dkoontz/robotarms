@@ -209,7 +209,6 @@ namespace RobotArms {
 
 		public abstract void InitializeAll(List<EntityAndComponents> entities);
 
-//		public abstract void ProcessAll(IEnumerable<GameObject> entities, Dictionary<GameObject, Component[]> components);
 		public abstract void ProcessAll(List<EntityAndComponents> entities);
 
 		public T GetBlackboard<T>() where T : MonoBehaviour {

@@ -47,10 +47,6 @@ namespace RobotArms {
 		RobotArmsProcessor[] lateUpdateProcessors;
 
 		Dictionary<RobotArmsProcessor, List<EntityAndComponents>> entitiesForProcessors;
-//		Dictionary<RobotArmsProcessor, Dictionary<GameObject, List<Component>>> entitiesForProcessors;
-		// We can't use a HashSet for the entity list due to this bug
-		// http://fogbugz.unity3d.com/default.asp?676743_ro5i82m19hb8tom8
-//		Dictionary<RobotArmsProcessor, List<GameObject>> entitiesForProcessorsToInitialize;
 		Dictionary<RobotArmsProcessor, List<EntityAndComponents>> entitiesForProcessorsToInitialize;
 	    
 		readonly HashSet<RobotArmsComponent> components = new HashSet<RobotArmsComponent>();
@@ -65,8 +61,6 @@ namespace RobotArms {
 
 			var processorTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(
 	        	assembly => assembly.GetTypes().Where(
-//					type => type.GetInterfaces().Contains(typeof(IRobotArmsProcessor))));
-//	            	type => type.IsAssignableFrom(typeof(IRobotArmsProcessor))));
 					type => type.IsSubclassOf(typeof(RobotArmsProcessor)) && !type.IsAbstract));
 
 			processors = processorTypes
@@ -85,13 +79,10 @@ namespace RobotArms {
 			}
 
 			entitiesForProcessors = new Dictionary<RobotArmsProcessor, List<EntityAndComponents>>(processors.Length);
-//			entitiesForProcessors = new Dictionary<RobotArmsProcessor, Dictionary<GameObject, List<Component>>>(processors.Length);
 			entitiesForProcessorsToInitialize = new Dictionary<RobotArmsProcessor, List<EntityAndComponents>>(processors.Length);
 
 			foreach (var p in processors) {
-//				entitiesForProcessors[p] = new Dictionary<GameObject, List<Component>>();
 				entitiesForProcessors[p] = new List<EntityAndComponents>();
-//				entitiesForProcessorsToInitialize[p] = new List<GameObject>();
 				entitiesForProcessorsToInitialize[p] = new List<EntityAndComponents>();
 			}
 
@@ -132,7 +123,6 @@ namespace RobotArms {
 				if (!entitiesForProcessorsToInitialize[p].Any(e => e.Entity == entity)) {
 					entitiesForProcessorsToInitialize[p].Add(current);
 				}
-//				AddDistinct(entitiesForProcessorsToInitialize[p], current);
 			}
 		}
 
@@ -179,10 +169,8 @@ namespace RobotArms {
 				if (p.IsActive == null || p.IsActive()) {
 					var entities = entitiesForProcessors[p];
 					entities.RemoveAll(e => e.Entity == null);
-//					entities.Remove(null);
 
 					p.ProcessAll(entities);
-//					p.ProcessAll(entities);
 				}
 			}
 

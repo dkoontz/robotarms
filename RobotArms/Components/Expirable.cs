@@ -24,7 +24,6 @@
 // 	 https://bitbucket.org/dkoontz/robotarms
 
 using UnityEngine;
-using System.Collections;
 using RobotArms;
 
 namespace RobotArms.BuiltIn {

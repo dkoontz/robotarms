@@ -46,6 +46,10 @@
     <Compile Include="Processors\DelayedActionProcessor.cs" />
     <Compile Include="Processors\ExpirableProcessor.cs" />
     <Compile Include="RobotArmsUtils.cs" />
+    <Compile Include="Components\CollisionTracker.cs" />
+    <Compile Include="Components\TriggerTracker.cs" />
+    <Compile Include="Components\Collision2DTracker.cs" />
+    <Compile Include="Components\Trigger2DTracker.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

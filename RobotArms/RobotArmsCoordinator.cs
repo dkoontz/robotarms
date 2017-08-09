@@ -159,19 +159,14 @@ namespace RobotArms {
 			RemovePendingComponents();
 
 			foreach (var p in robotArmsProcessors) {
-				if ((p.IsActive == null || p.IsActive()) && entitiesForProcessorsToInitialize[p].Count > 0) {
-					p.InitializeAll(entitiesForProcessorsToInitialize[p]);
-					entitiesForProcessorsToInitialize[p].Clear();
-				}
-			}
-
-			foreach (var p in robotArmsProcessors) {
 				if (p.IsActive == null || p.IsActive()) {
-					var entities = entitiesForProcessors[p];
-					p.ProcessAll(entities);
+					if (entitiesForProcessorsToInitialize[p].Count > 0) {
+						p.InitializeAll(entitiesForProcessorsToInitialize[p]);
+						entitiesForProcessorsToInitialize[p].Clear();
+					}
+					p.ProcessAll(entitiesForProcessors[p].Where(o => o.Entity.activeInHierarchy).ToList());
 				}
 			}
-
 			RunEndOfCurrentUpdateActions();
 		}
 

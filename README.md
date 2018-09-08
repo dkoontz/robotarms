@@ -22,14 +22,14 @@ We were originally inspired to write RobotArms after using the [Artemis](http://
 ### Getting started ###
 
 1. Get RobotArms
-  1. Download the source and compile
-  2. Copy the resulting dlls to your Unity project
-    1. RobotArms.dll goes anywhere in you Assets folder
-    2. RobotArmsEditor.dll goes into any folder named Editor in your Assets folder
-  3. Alternatively just copy the RobotArms source files to your Unity Assets folder
-    1. Remember to copy both the RobotArms source files and the RobotArmsEditor source files
+	1. Download the source and compile
+	2. Copy the resulting dlls to your Unity project
+		1. RobotArms.dll goes anywhere in you Assets folder
+		2. RobotArmsEditor.dll goes into any folder named Editor in your Assets folder
+	3. Alternatively just copy the RobotArms source files to your Unity Assets folder
+		1. Remember to copy both the RobotArms source files and the RobotArmsEditor source files
 2. Start writing Components and Processors
-  1. See the tutorial below
+	1. See the tutorial below
 
 ### Basic Usage ###
 
